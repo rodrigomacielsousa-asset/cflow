@@ -1,0 +1,98 @@
+{
+  "entities": {
+    "Clinic": {
+      "title": "Clinic",
+      "description": "Information about a health clinic/tenant.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "address": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "plan": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "contactEmail"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile metadata.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "clinicRoles": { 
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Map of clinicId to role (admin, receptionist, practitioner, financial)"
+        }
+      }
+    },
+    "Patient": {
+      "title": "Patient",
+      "description": "Patient information.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" },
+        "birthDate": { "type": "string", "format": "date" },
+        "cpf": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "A scheduled session.",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string" },
+        "professionalId": { "type": "string" },
+        "serviceId": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" },
+        "isRecurring": { "type": "boolean" },
+        "recurringGroupId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["patientId", "professionalId", "startTime", "endTime"]
+    },
+    "MedicalRecord": {
+      "title": "Medical Record",
+      "description": "Confidential patient session notes.",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string" },
+        "professionalId": { "type": "string" },
+        "appointmentId": { "type": "string" },
+        "content": { "type": "string" },
+        "type": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["patientId", "professionalId", "content", "type"]
+    }
+  },
+  "firestore": {
+    "/clinics/{clinicId}": {
+      "schema": "Clinic",
+      "description": "The root tenant document."
+    },
+    "/clinics/{clinicId}/patients/{patientId}": {
+      "schema": "Patient",
+      "description": "Patients belonging to the clinic."
+    },
+    "/clinics/{clinicId}/appointments/{appointmentId}": {
+      "schema": "Appointment",
+      "description": "Clinic-wide appointments."
+    },
+    "/clinics/{clinicId}/patients/{patientId}/medical_records/{recordId}": {
+      "schema": "MedicalRecord",
+      "description": "Highly sensitive medical notes."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Global user profiles with clinic associations."
+    }
+  }
+}

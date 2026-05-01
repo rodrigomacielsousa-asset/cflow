@@ -1,0 +1,9 @@
+{
+  "name": "Clinic Flow",
+  "description": "Clinic Flow – Gestão Completa para Clínicas Multiprofissionais (C-Flow)",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}

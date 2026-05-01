@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&family=Inter:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  
+  --color-primary-50: #f1f7ff;
+  --color-primary-100: #e3effe;
+  --color-primary-200: #c6dffc;
+  --color-primary-300: #98c6f9;
+  --color-primary-400: #62a5f4;
+  --color-primary-500: #2f80ed;
+  --color-primary-600: #2566d1;
+  --color-primary-700: #1e51ab;
+  --color-primary-800: #1c458b;
+  --color-primary-900: #1a3b74;
+  --color-primary-950: #11254a;
+
+  --color-accent-50: #f1f4f9;
+  --color-accent-100: #e3e9f3;
+  --color-accent-200: #c6d3e7;
+  --color-accent-300: #98b1d6;
+  --color-accent-400: #6287c0;
+  --color-accent-500: #3c61a5;
+  --color-accent-600: #1e3a8a;
+  --color-accent-700: #1b3275;
+  --color-accent-800: #1a2a5f;
+  --color-accent-900: #18244f;
+  --color-accent-950: #0f1632;
+  
+  --color-fiscal-50: #fff1f2;
+  --color-fiscal-100: #ffe4e6;
+  --color-fiscal-200: #fecdd3;
+  --color-fiscal-300: #fda4af;
+  --color-fiscal-400: #fb7185;
+  --color-fiscal-500: #f43f5e;
+  --color-fiscal-600: #e11d48;
+  --color-fiscal-700: #be123c;
+  --color-fiscal-800: #9f1239;
+  --color-fiscal-900: #881337;
+  --color-fiscal-950: #4c0519;
+  
+  --animate-float: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@layer base {
+  body {
+    @apply bg-[#F3F7FB] text-[#0F172A] antialiased;
+  }
+}

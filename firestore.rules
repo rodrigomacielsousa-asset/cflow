@@ -1,0 +1,136 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isMasterAdmin() {
+      return isSignedIn() && request.auth.token.email == 'contatocflow@gmail.com';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function getUserData(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
+    }
+
+    function hasRole(clinicId, roles) {
+      return isMasterAdmin() || (isSignedIn() && getUserData(request.auth.uid).clinicRoles[clinicId] in roles);
+    }
+    
+    function isMember(clinicId) {
+      return isMasterAdmin() || (isSignedIn() && getUserData(request.auth.uid).clinicRoles[clinicId] != null);
+    }
+
+    // --- User Profiles ---
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isMasterAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId 
+          && isValidUser(incoming());
+      allow update: if (isSignedIn() && request.auth.uid == userId) || isMasterAdmin();
+    }
+
+    function isValidUser(data) {
+      return data.email is string && data.email.size() <= 200
+          && data.displayName is string && data.displayName.size() <= 200;
+    }
+
+    function isValidPatient(data) {
+      return data.keys().hasAll(['name'])
+          && data.name is string && data.name.size() <= 200;
+    }
+
+    function isValidAppointment(data) {
+      return data.keys().hasAll(['patientId', 'professionalId', 'date', 'time'])
+          && isValidId(data.get('patientIdOrPlaceholder', data.patientId))
+          && isValidId(data.professionalId);
+    }
+
+    function isValidFinance(data) {
+      return data.keys().hasAll(['type', 'amount', 'date'])
+          && data.type in ['income', 'expense']
+          && (data.amount is number || data.amount is float);
+    }
+
+    // --- Clinic Tenants ---
+    match /clinics/{clinicId} {
+      allow get: if isMember(clinicId);
+      allow list: if isMasterAdmin();
+      
+      allow create: if isSignedIn() && isValidClinic(incoming()); 
+      allow update: if hasRole(clinicId, ['admin']) 
+          && isValidClinic(incoming());
+      allow delete: if isMasterAdmin();
+
+      // --- Staff ---
+      match /staff/{staffId} {
+        allow read: if isMember(clinicId);
+        allow write: if hasRole(clinicId, ['admin']);
+      }
+          
+      // --- Patients ---
+      match /patients/{patientId} {
+        allow read: if isMember(clinicId);
+        allow create: if hasRole(clinicId, ['admin', 'receptionist', 'practitioner']) 
+            && isValidPatient(incoming());
+        allow update: if hasRole(clinicId, ['admin', 'receptionist', 'practitioner'])
+            && isValidPatient(incoming());
+        allow delete: if hasRole(clinicId, ['admin']);
+
+        // --- Sub-collections (anamnesis, documents, etc) ---
+        match /anamnesis/{docId} {
+          allow read: if isMember(clinicId);
+          allow write: if hasRole(clinicId, ['admin', 'practitioner']);
+        }
+        match /documents/{docId} {
+          allow read: if isMember(clinicId);
+          allow write: if hasRole(clinicId, ['admin', 'practitioner']);
+        }
+      }
+
+      // --- Appointments ---
+      match /appointments/{appointmentId} {
+        allow read: if isMember(clinicId);
+        allow create: if hasRole(clinicId, ['admin', 'receptionist', 'practitioner', 'profissional', 'gestor', 'usuario', 'staff'])
+            && isValidAppointment(incoming());
+        allow update: if hasRole(clinicId, ['admin', 'receptionist', 'practitioner', 'profissional', 'gestor', 'usuario', 'staff'])
+            && isValidAppointment(incoming());
+        allow delete: if hasRole(clinicId, ['admin', 'gestor']);
+      }
+
+      // --- Finance ---
+      match /finance/{financeId} {
+        allow read: if hasRole(clinicId, ['admin', 'gestor', 'receptionist', 'usuario', 'staff']);
+        allow create: if hasRole(clinicId, ['admin', 'gestor', 'receptionist', 'usuario', 'staff'])
+            && isValidFinance(incoming());
+        allow update: if hasRole(clinicId, ['admin', 'gestor', 'receptionist', 'usuario', 'staff'])
+            && isValidFinance(incoming());
+        allow delete: if hasRole(clinicId, ['admin', 'gestor']);
+      }
+    }
+
+    function isValidMedicalRecord(data) {
+      return data.keys().hasAll(['patientId', 'professionalId', 'content', 'type'])
+          && isValidId(data.patientId)
+          && data.content is string && data.content.size() <= 10000;
+    }
+  }
+}

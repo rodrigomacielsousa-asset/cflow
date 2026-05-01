@@ -30,7 +30,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function Shell() {
-  const { profile, loading, user, managedClinicId, setManagedClinicId, isMaster, isGestor, isUsuario, isProfissional, isPaciente, impersonatedRole } = useAuth();
+  const { profile, loading, user, managedClinicId, setManagedClinicId, isMaster, isGestor, isUsuario, isProfissional, isPaciente, impersonatedRole, setImpersonatedRole } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 

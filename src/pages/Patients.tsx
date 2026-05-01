@@ -24,7 +24,8 @@ import {
   Camera,
   FileText,
   FilePlus,
-  FileCheck
+  FileCheck,
+  Zap
 } from 'lucide-react';
 
 export default function Patients() {
